@@ -10,6 +10,7 @@ def menu():
         2. 新增指定學號的課程名稱與分數
         3. 顯示指定學號的各科平均分數
         4. 離開
+        9. 顯示指定學號-各課分數 --平均--評等（外加）
         **********************************
         """)
     choice = input("請選擇操作項目：")
@@ -79,6 +80,7 @@ def choice_2_run():
     student_id = input("請輸入學號: ")
     course_name = input("請輸入課程名稱: ")
     course_score = float(input("請輸入課程分數: "))
+
     add_course(path_json, student_id, course_name, course_score)
 
 
@@ -107,33 +109,21 @@ def pad_to_width(word:str, width:int, )->str:
             return s+ chr(12288) * padding +' '         # 填充全形空白+一個空格 chr(32)
     return s+ chr(12288) *(s_width)               #如果沒有半形字
 
-def choice_3_run11():
+
+def choice_3_run():
     student_id = input("請輸入學號: ")
     try:
         student_info = get_student_info(student_id)  #讀取學生資料
         average_score = calculate_average_score(student_info)  #算平均
-
-        col_width = [14, 2]  # 定义列宽
-        CLASS_H = ["課程", "分數"]
-        # print_data=f"|"+"|".join(f'{col:{chr(12288)}^{width}}' for col, width in zip(header,col_width))+"|"
-        headers = ["| " + " | ".join(f'{col:{chr(12288)}^{width}}' for col, width in zip(CLASS_H,col_width)) + " |"]
-        print("\n".join(headers))
-        # print("-" * sum(col_width) + "---")  # 根据列宽打印分割线
-        for course in student_info['courses']:
-            row = ["| " + " | ".join([pad_to_width(course['name'], col_width[0]), pad_to_width(str(course['score']), col_width[1])]) + " |"]
-            print("\n".join(row))
-        num_courses = len(student_info['courses'])
-        print(f"學號 {student_id} ,共修習了 {num_courses} 門課程,平均分數: {average_score:.2f}")
-        # print(f"學號 {student_id} 平均分數: {average_score:.2f}")
+        print(f"學號 {student_id} 平均分數: {average_score:.2f}")
     except FileNotFoundError as fnfe:
        raise FileNotFoundError (f"請輸入正確值{fnfe}")
-    #    print(fnfe)
     except ValueError as ve:
        raise ValueError (f"請輸入正確值{ve}")
     except Exception as e:
        raise Exception(f"其他錯誤: {e}")
 
-def choice_3_run():
+def choice_9_run():
     student_id = input("請輸入學號: ")
     try:
         student_info = get_student_info(student_id)  # 讀取學生資料
@@ -147,7 +137,7 @@ def choice_3_run():
             row = ["| " + " | ".join([pad_to_width(course['name'], col_width[0]), pad_to_width(str(course['score']), col_width[1])]) + " |"]
             print("\n".join(row))
         num_courses = len(student_info['courses'])
-        print(f"學號 {student_id} ,共修習了 {num_courses} 門課程,平均分數: {average_score:.2f}")
+        print(f"學號 {student_id} ,共修習了 {num_courses} 門課程,平均分數: {average_score:.2f} 今年評等{get_grade(average_score)}級")
     except FileNotFoundError as fnfe:
        raise FileNotFoundError (f"請輸入正確值{fnfe}")
     #    print(fnfe)
@@ -156,6 +146,25 @@ def choice_3_run():
     except Exception as e:
        raise Exception(f"其他錯誤: {e}")
 
+def get_grade(score: float) -> str:
+    """
+    根據分數返回對應的等級
+    90分以上: A
+    80分以上: B
+    70分以上: C
+    60分以上: D
+    60分以下: E
+    """
+    if score >= 90:
+        return 'A'
+    elif score >= 80:
+        return 'B'
+    elif score >= 70:
+        return 'C'
+    elif score >= 60:
+        return 'D'
+    else:
+        return 'E'
 # 定義 JSON 文件路徑
 path_json = 'students.json'
 with open(path_json, encoding='utf-8') as file:
@@ -192,7 +201,13 @@ while True:
             print(f"{e}")
         except Exception as e:
             print(f"{e}")
-
+    elif choice == "9":
+        try:
+            choice_9_run()
+        except ValueError as e:
+            print(f"{e}")
+        except Exception as e:
+            print(f"{e}")
     elif choice in ("4", ""):
         print("=>程式結束。")
         break
